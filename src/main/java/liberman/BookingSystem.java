@@ -12,7 +12,6 @@ public class BookingSystem {
             int[][][] cinemaArray = cinema.getCinemaArray();
             int[] arraySeats = cinemaArray[hallNumber - 1][row - 1];
             boolean isAccept = true;
-
             for (int i = 0; i < seats.length; i++) {
                 int seat = seats[i];
                 if (arraySeats[seat - 1] == 1) {
@@ -62,7 +61,7 @@ public class BookingSystem {
         }
     }
 
-    public void checkAvailability(int screen, int numSeats) {
+    public Boolean checkAvailability(int screen, int numSeats) {
         try {
             int[][][] cinemaArray = cinema.getCinemaArray();
             int[][] arraySeats = cinemaArray[screen - 1];
@@ -78,7 +77,7 @@ public class BookingSystem {
                     counter++;
                     if (counter == numSeats) {
                         System.out.println("This count is available");
-                        return;
+                        return true;
                     }
                 }
                 counter = 0;
@@ -87,6 +86,7 @@ public class BookingSystem {
         } catch (IndexOutOfBoundsException exception) {
             System.out.println("Please, write correct data");
         }
+        return false;
     }
 
     public void printSeatingArrangement(int hallNumber) {
@@ -124,13 +124,44 @@ public class BookingSystem {
         }
     }
 
-    public void findBestAvailable(int hallNumber, int numSeats) {
-
+    public int[][] findBestAvailable(int hallNumber, int numSeats) {
+        try {
+            int[][][] cinemaArray = cinema.getCinemaArray();
+            int[][] arraySeats = cinemaArray[hallNumber - 1];
+            int row = cinema.getRow();
+            int place = cinema.getPlace();
+            int counter = 0;
+            for (int i = 0; i < row; i++) {
+                for (int j = 0; j < place; j++) {
+                    if (arraySeats[i][j] == 1) {
+                        counter = 0;
+                        continue;
+                    }
+                    counter++;
+                    if (counter == numSeats) {
+                        return new int[][]{{i}, {j - (numSeats-1), j}};
+                    }
+                }
+                counter = 0;
+            }
+        } catch (IndexOutOfBoundsException exception) {
+            System.out.println("Please, write correct data");
+            return null;
+        }
+        System.out.println("Sorry, this count is not available");
+        return null;
     }
 
     public void autoBook(int hallNumber, int numSeats) {
-
+        int[][] bestAvailable = findBestAvailable(hallNumber,numSeats);
+        int[] bestPlaces = bestAvailable[1];
+        int capacity = bestPlaces[1] - bestPlaces[0] + 1;
+        int[] places = new int[capacity];
+        int index = 0;
+        for (int i = bestPlaces[0]+1; i <= bestPlaces[1]+1; i++) {
+            places[index] = i;
+            index++;
+        }
+        bookSeats(hallNumber,bestAvailable[0][0]+1,places);
     }
-
-
 }
